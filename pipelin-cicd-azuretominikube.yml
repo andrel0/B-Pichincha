@@ -1,0 +1,51 @@
+trigger:
+- master
+
+pool:
+  name: 'Default'  # nombre del pool del agente local
+
+variables:
+  DOCKER_IMAGE: 'devops-BP'
+  MINIKUBE_IP: '192.x.x.x'  # Cambia esto por la IP de Minikube
+  MINIKUBE_PASSWORD: 'minikube_password'  # Cambiar esto por la contraseña de Minikube
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+        addToPath: true
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+      displayName: 'Install dependencies'
+
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(DOCKER_IMAGE)'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(Build.BuildId)
+
+- stage: Deploy
+  jobs:
+  - job: Deploy
+    steps:
+    - script: |
+        kubectl config set-cluster minikube --server=https://$(MINIKUBE_IP):8443 --insecure-skip-tls-verify=true
+        kubectl config set-credentials minikube --username=admin --password=$(MINIKUBE_PASSWORD)
+        kubectl config set-context minikube --cluster=minikube --user=minikube
+        kubectl config use-context minikube
+      displayName: 'Configure kubectl'
+
+    - script: |
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+        kubectl apply -f minikube.yaml
+      displayName: 'Deploy to Minikube'
