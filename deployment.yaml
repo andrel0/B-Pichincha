@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-BP
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-BP
+  template:
+    metadata:
+      labels:
+        app: devops-BP
+    spec:
+      containers:
+      - name: devops-BP
+        image: devops-BP:latest
+        ports:
+        - containerPort: 5000

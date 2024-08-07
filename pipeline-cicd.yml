@@ -1,0 +1,23 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - docker build -t devops-exercise .
+
+test:
+  stage: test
+  script:
+    - docker run --rm devops-exercise pytest tests/
+
+deploy:
+  stage: deploy
+  script:
+    - kubectl apply -f deployment.yaml
+    - kubectl apply -f service.yaml
+    - kubectl apply -f minikube.yaml
+  only:
+    - master

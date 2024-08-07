@@ -1,0 +1,13 @@
+# Loadbalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-BP
+spec:
+  selector:
+    app: devops-BP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: LoadBalancer
