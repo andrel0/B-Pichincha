@@ -1,2 +1,0 @@
-# B-Pichincha
-Reto Tecnico
